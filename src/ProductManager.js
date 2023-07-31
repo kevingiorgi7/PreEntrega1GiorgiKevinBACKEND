@@ -17,7 +17,7 @@ export default class ProductManager {
         }
     }
 
-    async addProducts(objProducts) {
+    async addProducts(objProduct) {
         try {
             const productsPrev = await this.getProducts()
             let id
@@ -26,12 +26,21 @@ export default class ProductManager {
             } else {
                 id = productsPrev[productsPrev.length - 1].id + 1
             }
-            productsPrev.push({
-                ...objProducts,
-                id
-            })
+            if(
+                !objProduct.title||
+                !objProduct.description||
+                !objProduct.code||
+                !objProduct.price||
+                !objProduct.status||
+                !objProduct.stock||
+                !objProduct.category) {
+                    console.log({"Error": 'Producto NO agregado. Faltan campos'})
+                    return {"Error": "Producto NO agregado. Faltan campos"}
+                }
+            const productCreated = {...objProduct,id}
+            productsPrev.push(productCreated)
             await promises.writeFile(this.path, JSON.stringify(productsPrev))
-            return console.log(`El producto: "${objProducts.title}", fue agregado exitosamente con el ID "${id}"`);
+            return productCreated //console.log(`El producto: "${objProducts.title}", fue agregado exitosamente con el ID "${id}"`);
         } catch (error) {
             throw error
         }
@@ -42,9 +51,9 @@ export default class ProductManager {
             const productsPrev = await this.getProducts()
             const idExist = productsPrev.find(e => e.id === idFind)
             if (!idExist) {
-                return console.log(`ERROR: El ID "${idFind}" no fue encontrado`);
+                return {"ERROR":`El ID ${idFind} no existe o no es un número`}//console.log(`ERROR: El ID "${idFind}" no fue encontrado`);
             }
-            return console.log(`El ID buscado por el usuario es del producto: `, idExist), idExist;
+            return  idExist /* console.log(`El ID buscado por el usuario es del producto: `, idExist), */;
         } catch (error) {
             throw error
         }
@@ -55,13 +64,16 @@ export default class ProductManager {
             const productsPrev = await this.getProducts()
             const productIndex = productsPrev.findIndex(e=>e.id === idUpdate)
             if(productIndex === -1) {
-                return console.log(`ERROR en la Actualizacion: El ID "${idUpdate}" no fue encontrado`);
+                return {'ERROR': `No se actualizó: El ID ${idUpdate} no fue encontrado`}// console.log(`ERROR en la Actualizacion: El ID "${idUpdate}" no fue encontrado`);
             }
             const product = productsPrev[productIndex]
+            if(objUpdate.id) {
+                return {'ERROR': 'No se puede actualizar el ID'} //console.log(`ERROR en la Actualizacion: El ID "${idUpdate}" no fue encontrado`);
+            }
             const productUpdate = {...product,...objUpdate}
             productsPrev[productIndex] = productUpdate
             await promises.writeFile(this.path, JSON.stringify(productsPrev))
-            return console.log(`El ID "${idUpdate}" fue actualizado`);
+            return productUpdate // console.log(`El ID "${idUpdate}" fue actualizado`);
         } catch (error) {
             throw error
         }
@@ -70,9 +82,10 @@ export default class ProductManager {
     async deleteProduct(idDelete) {
         try {
             const productsPrev = await this.getProducts()
+            const productDelete = productsPrev.find(p=>p.id===idDelete)
             const newArrayProducts = productsPrev.filter(e => e.id !== idDelete)
             await promises.writeFile(this.path, JSON.stringify(newArrayProducts))
-            return console.log(`El ID "${idDelete}" fue eliminado`);
+            return productDelete // console.log(`El ID "${idDelete}" fue eliminado`);
         } catch (error) {
             throw error
         }
@@ -83,83 +96,102 @@ const product1 = {
     title: 'Sensor',
     description: 'Sensor de estacionamiento trasero marca toyota',
     price: 50000,
-    thumbnail: './media/fotosensor',
+    thumbnail:[`./media/sensor/foto1.jpg`, `./media/sensor/foto2.jpg`, `./media/sensor/foto3.jpg`],
     code: '113355',
     stock: 20,
+    status: true,
+    category: 'yaris'
 }
 const product2 = {
     title: 'Barra',
     description: 'Barra anti vuelco marca toyota',
     price: 90000,
-    thumbnail: './media/fotobarra',
+    thumbnail:[`./media/barra/foto1.jpg`, `./media/barra/foto2.jpg`, `./media/barra/foto3.jpg`],
     code: '779911',
-    stock: 7,
+    stock: 17,
+    status: true,
+    category: 'hilux'
 }
 const product3 = {
     title: 'Cobertor',
     description: 'Cobertor caja marca toyota',
     price: 30000,
-    thumbnail: './media/fotocobertor',
+    thumbnail:[`./media/cobertor/foto1.jpg`, `./media/cobertor/foto2.jpg`, `./media/cobertor/foto3.jpg`],
     code: '335577',
     stock: 9,
+    status: true,
+    category: 'hilux'
 }
 const product4 = {
     title: 'Gancho De Arrastre',
     description: 'Enganche para arrastre de cargas',
     price: 130000,
-    thumbnail: './media/fotogancho',
+    thumbnail:[`./media/gancho/foto1.jpg`, `./media/gancho/foto2.jpg`, `./media/gancho/foto3.jpg`],
     code: '557799',
     stock: 15,
+    status: true,
+    category: 'hilux'
 }
 const product5 = {
     title: 'Embellecedor cromado de manija',
     description: 'Embellecedor de manijas de apertura de puertas',
     price: 40000,
-    thumbnail: './media/fotoembellecedor',
+    thumbnail:[`./media/embellecedor/foto1.jpg`, `./media/embellecedor/foto2.jpg`, `./media/embellecedor/foto3.jpg`],
     code: '224466',
     stock: 25,
+    status: true,
+    category: 'corolla'
 }
 const product6 = {
     title: 'Tuercas De Seguridad',
     description: 'Tuercas De Seguridad',
     price: 20000,
-    thumbnail: './media/fototuercas',
+    thumbnail:[`./media/tuercas/foto1.jpg`, `./media/tuercas/foto2.jpg`, `./media/tuercas/foto3.jpg`],
     code: '880022',
     stock: 50,
+    status: true,
+    category: 'yaris'
 }
 const product7 = {
     title: 'Cargador inalámbrico',
     description: 'Cargador inalámbrico marca toyota',
     price: 100000,
-    thumbnail: './media/fotocargador',
+    thumbnail:[`./media/cargador/foto1.jpg`, `./media/cargador/foto2.jpg`, `./media/cargador/foto3.jpg`],
     code: '446688',
     stock: 2,
+    status: true,
+    category: 'corolla'
 }
 const product8 = {
     title: 'Llanta',
     description: 'Llanta de aleación 18¨',
     price: 80000,
-    thumbnail: './media/fotollanta',
+    thumbnail:[`./media/llanta/foto1.jpg`, `./media/llanta/foto2.jpg`, `./media/llanta/foto3.jpg`],
     code: '668822',
     stock: 16,
+    status: true,
+    category: 'yaris'
 }
 const product9 = {
     title: 'Zócalo de aluminio',
     description: 'Embellecedor y protector de zócalos del vehículo',
     price: 30000,
-    thumbnail: './media/fotozocalo',
+    thumbnail:[`./media/zocalo/foto1.jpg`, `./media/zocalo/foto2.jpg`, `./media/zocalo/foto3.jpg`],
     code: '135246',
     stock: 5,
+    status: true,
+    category: 'corolla'
 }
 const product10 = {
     title: 'Porta Bicicleta',
     description: 'Accesorio para el transporte simple y seguro de bicicletas',
     price: 45000,
-    thumbnail: './media/fotoportabici',
+    thumbnail:[`./media/portabici/foto1.jpg`, `./media/portabici/foto2.jpg`, `./media/portabici/foto3.jpg`],
     code: '798017',
     stock: 1,
+    status: true,
+    category: 'hilux'
 }
-
 
 const objUpdate = {
     price: 70000,
