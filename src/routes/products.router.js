@@ -7,7 +7,7 @@ const manager = new ProductManager("Products.json");
 router.get('/', async (req,res)=>{
     try {
         const products = await manager.getProducts()
-        const {limit} = req.query   //let limit = Number(req.query.limit);
+        const {limit} = req.query   // IDEM: let limit = Number(req.query.limit);
         let productsLimited = limit? products.slice(0,+limit) : products;
         res.status(200).json({ message: 'Products', productsLimited})
     } catch (error) {

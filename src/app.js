@@ -14,12 +14,13 @@ app.use('/api/products', productsRouter)
 app.use('/api/carts', cartsRouter)
 
 
+// Probando el servidor
 app.get('/', (req,res)=>{
     res.send('¡Hola! Escuchando al puerto: 8080')
 })
 
 
-
+// Escuchando el servidor
 app.listen(8080, ()=>{
     console.log('Escuchando al puerto: 8080');
 })      

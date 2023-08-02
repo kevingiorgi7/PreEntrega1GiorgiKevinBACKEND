@@ -3,7 +3,7 @@ import CartsManager from "../CartsManager.js";
 const router = Router()
 const manager = new CartsManager("Carts.json");
 
-
+// GET
 router.get('/', async (req,res)=>{
     try {
         const carts = await manager.getCarts()
@@ -23,6 +23,7 @@ router.get('/:cid', async (req,res)=>{
     }
 })
 
+// POST
 router.post('/',async(req,res)=>{
     try {
         const createCart = await manager.createCart()
@@ -42,6 +43,28 @@ router.post('/:cid/products/:pid',async(req,res)=>{
     }
 })
 
+
+// DELETE 
+//Borrar un carrito
+router.delete('/:cid', async (req,res)=>{
+    const { cid } = req.params
+    try {
+        const cartDeleted = await manager.deleteCart(+cid)
+        res.status(200).json({ message: 'Cart deleted', product: cartDeleted })
+    } catch (error) {
+        throw res.status(500).json({ error })
+    }
+})
+// Borrar un producto de un carrito
+router.delete('/:cid/products/:pid', async (req,res)=>{
+    const {cid,pid} = req.params
+    try {
+        const productDeleted = await manager.deleteProductCart(+cid,pid)
+        res.status(200).json({ message: 'Product deleted', product: productDeleted })
+    } catch (error) {
+        throw res.status(500).json({ error })
+    }
+})
 
 
 export default router

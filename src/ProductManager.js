@@ -26,6 +26,7 @@ export default class ProductManager {
             } else {
                 id = productsPrev[productsPrev.length - 1].id + 1
             }
+            // Condicional para campos obligatorios del producto
             if(
                 !objProduct.title||
                 !objProduct.description||
@@ -34,13 +35,24 @@ export default class ProductManager {
                 !objProduct.status||
                 !objProduct.stock||
                 !objProduct.category) {
-                    console.log({"Error": 'Producto NO agregado. Faltan campos'})
                     return {"Error": "Producto NO agregado. Faltan campos"}
                 }
+            // Condicional para evitar que se cree un ID manualmente
+            if(objProduct.id || objProduct.ID || objProduct.Id || objProduct.iD) {
+                return {"Error": 'Producto NO agregado. No se puede agregar un ID, se genera automaticamente'}
+            }
+            // Condicional para evitar que se cree un producto con un CODE ya existente
+            const codeAdd = objProduct.code
+            const codeExist = productsPrev.find(p=>p.code ===codeAdd)
+            if(codeExist) {
+                return {"Error": 'Producto NO agregado. El CODE ya existe'}
+            }
+            // Creacion de producto con el objeto + el ID autogenerado
             const productCreated = {...objProduct,id}
+            // Agregar el producto al array de productos
             productsPrev.push(productCreated)
             await promises.writeFile(this.path, JSON.stringify(productsPrev))
-            return productCreated //console.log(`El producto: "${objProducts.title}", fue agregado exitosamente con el ID "${id}"`);
+            return productCreated
         } catch (error) {
             throw error
         }
@@ -51,9 +63,9 @@ export default class ProductManager {
             const productsPrev = await this.getProducts()
             const idExist = productsPrev.find(e => e.id === idFind)
             if (!idExist) {
-                return {"ERROR":`El ID ${idFind} no existe o no es un número`}//console.log(`ERROR: El ID "${idFind}" no fue encontrado`);
+                return {"ERROR":`El ID ${idFind} no existe o no es un número`}
             }
-            return  idExist /* console.log(`El ID buscado por el usuario es del producto: `, idExist), */;
+            return  idExist
         } catch (error) {
             throw error
         }
@@ -62,18 +74,26 @@ export default class ProductManager {
     async updateProduct(idUpdate, objUpdate) {
         try {
             const productsPrev = await this.getProducts()
-            const productIndex = productsPrev.findIndex(e=>e.id === idUpdate)
+            const productIndex = productsPrev.findIndex(e=>e.id === idUpdate) // Si da -1 es porque no encontro nada
             if(productIndex === -1) {
-                return {'ERROR': `No se actualizó: El ID ${idUpdate} no fue encontrado`}// console.log(`ERROR en la Actualizacion: El ID "${idUpdate}" no fue encontrado`);
+                return {'ERROR': `No se actualizó: El ID ${idUpdate} no fue encontrado`};
             }
+            // Condicional para evitar que se cree un ID manualmente
             const product = productsPrev[productIndex]
-            if(objUpdate.id) {
-                return {'ERROR': 'No se puede actualizar el ID'} //console.log(`ERROR en la Actualizacion: El ID "${idUpdate}" no fue encontrado`);
+            if(objUpdate.id || objUpdate.ID || objUpdate.Id || objUpdate.iD) {
+                return {'ERROR': 'No se puede actualizar el ID'};
             }
+            // Condicional para evitar que se cree un producto con un CODE ya existente
+            const codeAdd = objUpdate.code
+            const codeExist = productsPrev.find(p=>p.code ===codeAdd)
+            if(codeExist) {
+                return {"Error": 'Producto NO agregado. El CODE ya existe'}
+            }
+            // Actualizacion del producto
             const productUpdate = {...product,...objUpdate}
             productsPrev[productIndex] = productUpdate
             await promises.writeFile(this.path, JSON.stringify(productsPrev))
-            return productUpdate // console.log(`El ID "${idUpdate}" fue actualizado`);
+            return productUpdate
         } catch (error) {
             throw error
         }
@@ -85,7 +105,7 @@ export default class ProductManager {
             const productDelete = productsPrev.find(p=>p.id===idDelete)
             const newArrayProducts = productsPrev.filter(e => e.id !== idDelete)
             await promises.writeFile(this.path, JSON.stringify(newArrayProducts))
-            return productDelete // console.log(`El ID "${idDelete}" fue eliminado`);
+            return productDelete
         } catch (error) {
             throw error
         }

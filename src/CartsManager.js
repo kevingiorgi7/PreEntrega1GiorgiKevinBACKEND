@@ -1,4 +1,6 @@
 import { existsSync, promises } from 'fs'
+import ProductManager from "./ProductManager.js";
+const manager = new ProductManager("Products.json");
 
 export default class CartsManager {
     constructor(path) {
@@ -47,9 +49,15 @@ export default class CartsManager {
 
     async addProduct(cid,pid){
         try {
+            //Corroborar la existencia de un carrito con ese ID
             const carts = await this.getCarts()
-            const cart = carts.find(c=>c.id===cid)
-            //const cart = await this.getCartsByID(cid) -> de esa forma no funciona
+            const cart = carts.find(c=>c.id===cid) //const cart = await this.getCartsByID(cid) -> de esa forma no funciona, no se porque
+            if(!cart){return {"ERROR":`El Carrito con ID ${cid} no existe o no es un número`}} 
+            //Corroborar la existencia de un producto con ese ID
+            const products = await manager.getProducts() 
+            const productExist = products.find(p=>p.id===(+pid))
+            if(!productExist){return {"ERROR":`El Producto con ID ${pid} no existe o no es un número`}}
+            // Corroborar si el producto ya existe en ese carrito
             const cartIndex = cart.products.findIndex(e=>e.productID===pid)
             if(cartIndex===-1){ //si en findindex no encuentra nada, arroja -1
                 cart.products.push({
@@ -65,5 +73,40 @@ export default class CartsManager {
             throw error
         }
     }
+    async deleteProductCart(cid,pid){
+        try {
+            //Corroborar la existencia de un carrito con ese ID
+            const carts = await this.getCarts()
+            const cart = carts.find(c=>c.id===cid) //const cart = await this.getCartsByID(cid) -> de esa forma no funciona, no se porque
+            if(!cart){return {"ERROR":`El Carrito con ID ${cid} no existe o no es un número`}} 
+            // Corroborar si el producto existe en el carrito
+            const cartIndex = cart.products.findIndex(e=>e.productID===pid)
+            if(cartIndex===-1){ //si en findindex no encuentra nada, arroja -1
+                return {"ERROR":`El Producto con ID ${pid} no existe en el Carrito con ID ${cid} o no es un número`}
+            }
+            // Eliminar el producto del carrito
+            cart.products.splice(cartIndex,1)
+            await promises.writeFile(this.path, JSON.stringify(carts))
+            return cart
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async deleteCart(idDelete) {
+        try {
+            const carts = await this.getCarts()
+            const cartDelete = carts.find(p=>p.id===idDelete)
+            if(!cartDelete){
+                return {"ERROR":`El Carrito con ID ${idDelete} no existe o no es un número`}
+            }
+            const newArrayCarts = carts.filter(e => e.id !== idDelete)
+            await promises.writeFile(this.path, JSON.stringify(newArrayCarts))
+            return cartDelete 
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
